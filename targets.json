@@ -1,0 +1,26 @@
+{
+  "streamlit": [
+    {
+      "name": "bcrp-inflation-forecast",
+      "url": "https://bcrp-inflation-forecast.streamlit.app"
+    },
+    {
+      "name": "unofficial-livecounts-api",
+      "url": "https://unofficial-livecounts-api.streamlit.app"
+    }
+  ],
+  "supabase_rest": [
+    {
+      "name": "dental-clinic-web",
+      "url_env": "DENTAL_SUPABASE_URL",
+      "key_env": "DENTAL_SUPABASE_ANON_KEY",
+      "table": "doctors"
+    }
+  ],
+  "supabase_postgres": [
+    {
+      "name": "riskpredictor-xai",
+      "dsn_env": "RISKPREDICTOR_DATABASE_URL"
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+name: keepalive
+
+on:
+  schedule:
+    # Cada 6 horas: Streamlit duerme tras ~12 h sin visitas y Supabase tras 7 días.
+    - cron: "17 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: keepalive
+  cancel-in-progress: false
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Instalar dependencias
+        run: |
+          pip install -r requirements.txt
+          python -m playwright install --with-deps chromium
+
+      - name: Despertar apps
+        id: check
+        continue-on-error: true
+        env:
+          DENTAL_SUPABASE_URL: ${{ secrets.DENTAL_SUPABASE_URL }}
+          DENTAL_SUPABASE_ANON_KEY: ${{ secrets.DENTAL_SUPABASE_ANON_KEY }}
+          RISKPREDICTOR_DATABASE_URL: ${{ secrets.RISKPREDICTOR_DATABASE_URL }}
+        run: python keepalive.py
+
+      - name: Captura de apps que no cargaron
+        if: steps.check.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: "*.png"
+          if-no-files-found: ignore
+
+      # STATUS.md solo cambia una vez al día como máximo. Ese commit además evita que
+      # GitHub desactive el cron tras 60 días sin actividad en el repo.
+      - name: Guardar STATUS.md
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add STATUS.md
+          git diff --cached --quiet || (git commit -m "chore: actualizar estado de las apps" && git push)
+
+      - name: Fallar si alguna app no respondió
+        if: steps.check.outcome == 'failure'
+        run: exit 1
