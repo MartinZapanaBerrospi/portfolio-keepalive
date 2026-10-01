@@ -6,5 +6,5 @@
 |---|---|---|
 | Streamlit | bcrp-inflation-forecast | ✅ OK |
 | Streamlit | unofficial-livecounts-api | ✅ OK |
-| Supabase | dental-clinic-web | ❌ error: ConnectionError |
-| Supabase | riskpredictor-xai | ❌ error: OperationalError |
+| Supabase | dental-clinic-web | ✅ consulta OK |
+| Supabase | riskpredictor-xai | ✅ consulta OK |
