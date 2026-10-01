@@ -20,7 +20,8 @@ $secrets = @{
 
 foreach ($name in $secrets.Keys) {
     if ($secrets[$name]) {
-        $secrets[$name] | gh secret set $name --repo $repo
+        # --body evita el salto de línea que PowerShell añade al usar la tubería.
+        gh secret set $name --repo $repo --body $secrets[$name]
     } else {
         Write-Warning "$name no encontrado; se omite"
     }
