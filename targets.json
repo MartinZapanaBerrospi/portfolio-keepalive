@@ -15,6 +15,12 @@
       "url_env": "DENTAL_SUPABASE_URL",
       "key_env": "DENTAL_SUPABASE_ANON_KEY",
       "table": "doctors"
+    },
+    {
+      "name": "entrenador-admision",
+      "url_env": "ENTRENADOR_SUPABASE_URL",
+      "key_env": "ENTRENADOR_SUPABASE_KEY",
+      "table": "keepalive"
     }
   ],
   "supabase_postgres": [

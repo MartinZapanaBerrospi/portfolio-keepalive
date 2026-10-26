@@ -16,6 +16,8 @@ $secrets = @{
     DENTAL_SUPABASE_URL        = Read-EnvValue "$base\dental-clinic-web\.env.local" "NEXT_PUBLIC_SUPABASE_URL"
     DENTAL_SUPABASE_ANON_KEY   = Read-EnvValue "$base\dental-clinic-web\.env.local" "NEXT_PUBLIC_SUPABASE_ANON_KEY"
     RISKPREDICTOR_DATABASE_URL = Read-EnvValue "$base\riskpredictor-xai\.env" "DATABASE_URL"
+    ENTRENADOR_SUPABASE_URL    = Read-EnvValue "$base\entrenador-admision\apps\web\.env.local" "NEXT_PUBLIC_SUPABASE_URL"
+    ENTRENADOR_SUPABASE_KEY    = Read-EnvValue "$base\entrenador-admision\apps\web\.env.local" "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY"
 }
 
 foreach ($name in $secrets.Keys) {

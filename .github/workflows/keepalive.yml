@@ -37,6 +37,8 @@ jobs:
           DENTAL_SUPABASE_URL: ${{ secrets.DENTAL_SUPABASE_URL }}
           DENTAL_SUPABASE_ANON_KEY: ${{ secrets.DENTAL_SUPABASE_ANON_KEY }}
           RISKPREDICTOR_DATABASE_URL: ${{ secrets.RISKPREDICTOR_DATABASE_URL }}
+          ENTRENADOR_SUPABASE_URL: ${{ secrets.ENTRENADOR_SUPABASE_URL }}
+          ENTRENADOR_SUPABASE_KEY: ${{ secrets.ENTRENADOR_SUPABASE_KEY }}
         run: python keepalive.py
 
       - name: Captura de apps que no cargaron
