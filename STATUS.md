@@ -7,5 +7,5 @@
 | Streamlit | bcrp-inflation-forecast | ✅ OK |
 | Streamlit | unofficial-livecounts-api | ✅ OK |
 | Supabase | dental-clinic-web | ✅ consulta OK |
-| Supabase | entrenador-admision | ❌ error: MissingSchema |
+| Supabase | entrenador-admision | ✅ consulta OK |
 | Supabase | riskpredictor-xai | ✅ consulta OK |
