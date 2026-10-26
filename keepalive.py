@@ -69,7 +69,8 @@ def check_supabase_rest(target):
     resp = requests.get(
         f"{url.rstrip('/')}/rest/v1/{target['table']}",
         params={"select": "*", "limit": "1"},
-        headers={"apikey": key, "Authorization": f"Bearer {key}"},
+        # Las claves nuevas (sb_publishable_...) no son JWT: van solo como apikey
+        headers={"apikey": key, **({"Authorization": f"Bearer {key}"} if key.startswith("eyJ") else {})},
         timeout=60,
     )
     if resp.ok:
