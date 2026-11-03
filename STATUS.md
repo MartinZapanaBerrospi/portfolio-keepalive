@@ -4,7 +4,7 @@
 
 | Plataforma | Proyecto | Estado |
 |---|---|---|
-| Streamlit | bcrp-inflation-forecast | ✅ OK |
+| Streamlit | bcrp-inflation-forecast | ❌ no cargó a tiempo |
 | Streamlit | unofficial-livecounts-api | ✅ OK |
 | Supabase | dental-clinic-web | ✅ consulta OK |
 | Supabase | entrenador-admision | ✅ consulta OK |
