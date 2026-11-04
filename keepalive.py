@@ -25,6 +25,8 @@ STATUS_FILE = ROOT / "STATUS.md"
 WAKE_BUTTON = re.compile(r"get this app back up", re.I)
 APP_SELECTOR = '[data-testid="stApp"], [data-testid="stAppViewContainer"]'
 WAKE_TIMEOUT_S = 300
+# Si la página no muestra la app ni el botón de despertar en este tiempo, se recarga.
+STUCK_RELOAD_S = 60
 
 
 def app_is_rendered(page):
@@ -44,6 +46,7 @@ def check_streamlit(browser, target):
     try:
         page.goto(target["url"], wait_until="domcontentloaded", timeout=90_000)
         deadline = time.monotonic() + WAKE_TIMEOUT_S
+        last_load = time.monotonic()
         while time.monotonic() < deadline:
             if app_is_rendered(page):
                 # Unos segundos extra para que la sesión websocket quede registrada.
@@ -53,6 +56,15 @@ def check_streamlit(browser, target):
             if not woke and button.count() > 0 and button.first.is_visible():
                 button.first.click()
                 woke = True
+                last_load = time.monotonic()
+            elif time.monotonic() - last_load > STUCK_RELOAD_S:
+                # A veces un archivo JS de Streamlit se queda colgado y la página se
+                # atasca en el spinner aunque la app esté activa: se recarga.
+                try:
+                    page.reload(wait_until="domcontentloaded", timeout=60_000)
+                except Exception:
+                    pass
+                last_load = time.monotonic()
             page.wait_for_timeout(5_000)
         page.screenshot(path=str(ROOT / f"{target['name']}.png"), full_page=True)
         return "no cargó a tiempo", False
