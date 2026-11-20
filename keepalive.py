@@ -3,8 +3,12 @@
 - Streamlit Community Cloud: duerme las apps tras ~12 h sin visitas. Una petición
   HTTP simple no cuenta como visita, así que se abre la app con un navegador real
   (Playwright) y, si está dormida, se pulsa "Yes, get this app back up!".
-- Supabase Free: pausa el proyecto tras 7 días sin actividad. Basta con ejecutar
-  una consulta real contra la base de datos (vía REST o vía Postgres directo).
+- Supabase Free: pausa el proyecto si en 7 días no hay suficiente "actividad de
+  usuario en la base de datos". Una vista que devuelve una constante (select 1) o
+  una consulta al catálogo NO basta (así se pausó entrenador-admision en 2026-11).
+  Método preferido: conexión Postgres directa que ESCRIBE una fila de latido en
+  keepalive.ping (esquema propio, no expuesto por la API). Respaldo, si no hay DSN:
+  lectura REST de una tabla real con datos.
 
 Los objetivos se definen en targets.json; las credenciales llegan por variables de
 entorno (GitHub Secrets). Un objetivo sin credenciales se omite con un aviso.
@@ -72,33 +76,56 @@ def check_streamlit(browser, target):
         page.close()
 
 
-def check_supabase_rest(target):
+PING_SQL = """
+create schema if not exists keepalive;
+create table if not exists keepalive.ping (
+    id smallint primary key default 1 check (id = 1),
+    pinged_at timestamptz not null default now(),
+    pings bigint not null default 0
+);
+revoke all on schema keepalive from public;
+"""
+PING_UPSERT = """
+insert into keepalive.ping (id, pinged_at, pings) values (1, now(), 1)
+on conflict (id) do update set pinged_at = now(), pings = keepalive.ping.pings + 1
+returning pings
+"""
+
+
+def supabase_postgres_ping(dsn):
+    import psycopg
+
+    # prepare_threshold=None: compatible con el pooler en modo transacción (puerto 6543).
+    with psycopg.connect(dsn, connect_timeout=30, prepare_threshold=None) as conn:
+        if conn.execute("select to_regclass('keepalive.ping')").fetchone()[0] is None:
+            conn.execute(PING_SQL)
+        pings = conn.execute(PING_UPSERT).fetchone()[0]
+    return f"latido escrito por Postgres (#{pings})", True
+
+
+def supabase_rest_read(url, key, table):
     import requests
 
-    url, key = os.getenv(target["url_env"]), os.getenv(target["key_env"])
-    if not url or not key:
-        return "sin credenciales (omitido)", None
     resp = requests.get(
-        f"{url.rstrip('/')}/rest/v1/{target['table']}",
+        f"{url.rstrip('/')}/rest/v1/{table}",
         params={"select": "*", "limit": "1"},
-        # Las claves nuevas (sb_publishable_...) no son JWT: van solo como apikey
+        # Las claves nuevas (sb_publishable_/sb_secret_) no son JWT: van solo como apikey
         headers={"apikey": key, **({"Authorization": f"Bearer {key}"} if key.startswith("eyJ") else {})},
         timeout=60,
     )
     if resp.ok:
-        return "consulta OK", True
+        return f"lectura REST de {table} (respaldo: falta DSN)", True
     return f"HTTP {resp.status_code}", False
 
 
-def check_supabase_postgres(target):
-    import psycopg
-
-    dsn = os.getenv(target["dsn_env"])
-    if not dsn:
-        return "sin credenciales (omitido)", None
-    with psycopg.connect(dsn, connect_timeout=30) as conn:
-        conn.execute("select count(*) from pg_stat_user_tables").fetchone()
-    return "consulta OK", True
+def check_supabase(target):
+    dsn = os.getenv(target.get("dsn_env", ""))
+    if dsn:
+        return supabase_postgres_ping(dsn)
+    url, key = os.getenv(target.get("url_env", "")), os.getenv(target.get("key_env", ""))
+    if url and key and target.get("table"):
+        return supabase_rest_read(url, key, target["table"])
+    return "sin credenciales (omitido)", None
 
 
 def run_checks():
@@ -112,10 +139,8 @@ def run_checks():
             results.append(("Streamlit", target, safe(check_streamlit, browser, target)))
         browser.close()
 
-    for target in TARGETS.get("supabase_rest", []):
-        results.append(("Supabase", target, safe(check_supabase_rest, target)))
-    for target in TARGETS.get("supabase_postgres", []):
-        results.append(("Supabase", target, safe(check_supabase_postgres, target)))
+    for target in TARGETS.get("supabase", []):
+        results.append(("Supabase", target, safe(check_supabase, target)))
 
     return results
 
@@ -141,7 +166,8 @@ def write_status(results):
     ]
     for platform, target, (detail, ok) in results:
         # "despertada" vs "activa" cambia en cada corrida; en el archivo ambas cuentan como OK.
-        shown = "OK" if ok and platform == "Streamlit" else detail
+        # El contador de latidos también cambia en cada corrida; se omite del archivo.
+        shown = "OK" if ok and platform == "Streamlit" else re.sub(r" \(#\d+\)", "", detail)
         lines.append(f"| {platform} | {target['name']} | {icons[ok]} {shown} |")
     STATUS_FILE.write_text("\n".join(lines) + "\n", encoding="utf-8")
 

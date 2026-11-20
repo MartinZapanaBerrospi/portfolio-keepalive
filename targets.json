@@ -9,21 +9,21 @@
       "url": "https://unofficial-livecounts-api.streamlit.app"
     }
   ],
-  "supabase_rest": [
+  "supabase": [
     {
       "name": "dental-clinic-web",
+      "dsn_env": "DENTAL_DATABASE_URL",
       "url_env": "DENTAL_SUPABASE_URL",
       "key_env": "DENTAL_SUPABASE_ANON_KEY",
       "table": "doctors"
     },
     {
       "name": "entrenador-admision",
+      "dsn_env": "ENTRENADOR_DATABASE_URL",
       "url_env": "ENTRENADOR_SUPABASE_URL",
-      "key_env": "ENTRENADOR_SUPABASE_KEY",
-      "table": "keepalive"
-    }
-  ],
-  "supabase_postgres": [
+      "key_env": "ENTRENADOR_SUPABASE_SECRET_KEY",
+      "table": "exam_profiles"
+    },
     {
       "name": "riskpredictor-xai",
       "dsn_env": "RISKPREDICTOR_DATABASE_URL"

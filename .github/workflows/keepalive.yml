@@ -2,7 +2,7 @@ name: keepalive
 
 on:
   schedule:
-    # Cada 6 horas: Streamlit duerme tras ~12 h sin visitas y Supabase tras 7 días.
+    # Cada 6 horas: Streamlit duerme tras ~12 h sin visitas y Supabase tras 7 días con poca actividad.
     - cron: "17 */6 * * *"
   workflow_dispatch:
 
@@ -36,9 +36,11 @@ jobs:
         env:
           DENTAL_SUPABASE_URL: ${{ secrets.DENTAL_SUPABASE_URL }}
           DENTAL_SUPABASE_ANON_KEY: ${{ secrets.DENTAL_SUPABASE_ANON_KEY }}
+          DENTAL_DATABASE_URL: ${{ secrets.DENTAL_DATABASE_URL }}
           RISKPREDICTOR_DATABASE_URL: ${{ secrets.RISKPREDICTOR_DATABASE_URL }}
           ENTRENADOR_SUPABASE_URL: ${{ secrets.ENTRENADOR_SUPABASE_URL }}
-          ENTRENADOR_SUPABASE_KEY: ${{ secrets.ENTRENADOR_SUPABASE_KEY }}
+          ENTRENADOR_SUPABASE_SECRET_KEY: ${{ secrets.ENTRENADOR_SUPABASE_SECRET_KEY }}
+          ENTRENADOR_DATABASE_URL: ${{ secrets.ENTRENADOR_DATABASE_URL }}
         run: python keepalive.py
 
       - name: Captura de apps que no cargaron
