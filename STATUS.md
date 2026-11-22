@@ -1,6 +1,6 @@
 # Estado de las apps
 
-Última verificación: **2026-11-21** (UTC)
+Última verificación: **2026-11-22** (UTC)
 
 | Plataforma | Proyecto | Estado |
 |---|---|---|
