@@ -71,6 +71,9 @@ python -m venv .venv
   Supabase → organización → proyecto → **Resume project** (hasta 90 días después de la
   pausa). Este workflow solo evita que vuelva a pausarse.
 - Si llega el correo de aviso, entrar al proyecto en el panel también cuenta como actividad.
+- 2026-11-22: `riskpredictor-xai` (proyecto RiskPredictor-RPA) se pausó a propósito para dejar
+  lugar a `tiza` (límite de 2 proyectos gratuitos activos) y salió de `targets.json`. Para volver a
+  usarlo hay que pausar otro proyecto, reanudarlo en el panel y registrarlo aquí de nuevo.
 
 ## Límites de los planes gratuitos implicados
 
